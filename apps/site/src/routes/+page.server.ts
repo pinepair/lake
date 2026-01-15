@@ -1,4 +1,4 @@
-import { feeds, getAllTags } from '@lake/data';
+import { feeds, getAllTags } from '$lib/feeds';
 import { slugifyDomain } from '$lib/utils/slugify';
 
 export function load() {

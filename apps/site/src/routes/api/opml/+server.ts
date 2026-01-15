@@ -1,4 +1,4 @@
-import { feeds } from '@lake/data';
+import { feeds } from '$lib/feeds';
 import { slugifyDomain } from '$lib/utils/slugify';
 import { generateOpml } from '$lib/utils/opml';
 
