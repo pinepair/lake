@@ -3,8 +3,8 @@
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "dev": "bun run --filter site dev",
-    "build": "bun run --filter site build",
-    "start": "bun run --filter site start"
+    "dev": "bun run --filter @lake/site dev",
+    "build": "bun run --filter @lake/site build",
+    "start": "bun run --filter @lake/site start"
   }
 }
