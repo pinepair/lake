@@ -1,6 +1,7 @@
 <script lang="ts">
   import { generateOpml } from '$lib/utils/opml';
   import { getFeedlyUrl, getInoreaderUrl, getFeedProtocolUrl } from '$lib/utils/readers';
+  import { resolve } from '$app/paths';
 
   let { data } = $props();
   let copied = $state(false);
@@ -24,51 +25,56 @@
 </script>
 
 <svelte:head>
-  <title>{data.feed.title} - RSS Feed Directory</title>
+  <title>{data.feed.title} - lake.directory</title>
   <meta name="description" content={data.feed.text} />
 </svelte:head>
 
-<div class="mx-auto max-w-4xl p-6">
-  <a href="/" class="mb-4 inline-block text-blue-600 hover:underline">&larr; Back</a>
+<main class="mx-auto max-w-3xl px-6 py-12">
+  <a href={resolve('/')} class="mb-8 inline-flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-white">
+    <span>&larr;</span> Back to feeds
+  </a>
 
-  <h1 class="mb-2 text-3xl font-bold">{data.feed.title}</h1>
-  <p class="mb-4 text-gray-600">{data.feed.text}</p>
-
-  <div class="mb-6 flex gap-2">
-    {#each data.feed.tags as tag}
-      <span class="rounded bg-gray-100 px-2 py-1 text-sm text-gray-600">{tag}</span>
-    {/each}
+  <div class="mb-8">
+    <p class="mb-2 font-mono text-sm text-[var(--text-muted)]">{data.feed.text}</p>
+    <h1 class="mb-4 text-3xl font-bold">{data.feed.title}</h1>
+    <div class="flex gap-2">
+      {#each data.feed.tags as tag (tag)}
+        <span class="rounded-full border border-[var(--border)] bg-[var(--bg-card)] px-3 py-1 text-sm text-[var(--text-muted)]">
+          {tag}
+        </span>
+      {/each}
+    </div>
   </div>
 
-  <div class="mb-6 rounded border bg-gray-50 p-4">
-    <h2 class="mb-2 font-semibold">Feed URL</h2>
-    <code class="block break-all rounded bg-white p-2 text-sm">{data.feed.xmlUrl}</code>
+  <div class="mb-8 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
+    <h2 class="mb-3 text-sm font-medium text-[var(--text-muted)]">Feed URL</h2>
+    <code class="block break-all rounded bg-[var(--bg)] p-3 text-sm">{data.feed.xmlUrl}</code>
   </div>
 
-  <div class="mb-6">
-    <h2 class="mb-3 font-semibold">Actions</h2>
+  <div class="mb-8">
+    <h2 class="mb-4 text-sm font-medium text-[var(--text-muted)]">Actions</h2>
     <div class="flex flex-wrap gap-3">
       <button
         onclick={copyUrl}
-        class="rounded bg-gray-200 px-4 py-2 text-sm hover:bg-gray-300"
+        class="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2 text-sm transition-colors hover:bg-[var(--bg-card-hover)]"
       >
         {copied ? 'Copied!' : 'Copy URL'}
       </button>
       <button
         onclick={downloadOpml}
-        class="rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
+        class="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
       >
         Download OPML
       </button>
     </div>
   </div>
 
-  <div class="mb-6">
-    <h2 class="mb-3 font-semibold">Open in Reader</h2>
+  <div class="mb-8">
+    <h2 class="mb-4 text-sm font-medium text-[var(--text-muted)]">Open in Reader</h2>
     <div class="flex flex-wrap gap-3">
       <a
         href={getFeedProtocolUrl(data.feed.xmlUrl)}
-        class="rounded bg-orange-500 px-4 py-2 text-sm text-white hover:bg-orange-600"
+        class="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2 text-sm transition-colors hover:bg-[var(--bg-card-hover)]"
       >
         Default Reader
       </a>
@@ -76,7 +82,7 @@
         href={getFeedlyUrl(data.feed.xmlUrl)}
         target="_blank"
         rel="noopener"
-        class="rounded bg-green-500 px-4 py-2 text-sm text-white hover:bg-green-600"
+        class="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2 text-sm transition-colors hover:bg-[var(--bg-card-hover)]"
       >
         Feedly
       </a>
@@ -84,7 +90,7 @@
         href={getInoreaderUrl(data.feed.xmlUrl)}
         target="_blank"
         rel="noopener"
-        class="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+        class="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-2 text-sm transition-colors hover:bg-[var(--bg-card-hover)]"
       >
         Inoreader
       </a>
@@ -92,14 +98,14 @@
   </div>
 
   <div>
-    <h2 class="mb-3 font-semibold">Website</h2>
+    <h2 class="mb-4 text-sm font-medium text-[var(--text-muted)]">Website</h2>
     <a
       href={data.feed.htmlUrl}
       target="_blank"
       rel="noopener"
-      class="text-blue-600 hover:underline"
+      class="text-[var(--accent)] hover:underline"
     >
       {data.feed.htmlUrl}
     </a>
   </div>
-</div>
+</main>
