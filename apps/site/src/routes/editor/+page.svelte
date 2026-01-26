@@ -1,4 +1,6 @@
 <script lang="ts">
+  import {SvelteMap, SvelteSet} from "svelte/reactivity";
+
   type OPMLItem = OPMLFeed | OPMLFolder;
 
   interface OPMLFeed {
@@ -172,7 +174,7 @@ ${outlines}  </body>
 
   function deleteItem(id: string) {
     // Delete item and all children recursively
-    const toDelete = new Set<string>();
+    const toDelete = new SvelteSet<string>();
     function collectChildren(parentId: string) {
       toDelete.add(parentId);
       items.filter((i) => i.parentId === parentId).forEach((i) => collectChildren(i.id));
@@ -183,7 +185,7 @@ ${outlines}  </body>
   }
 
   function deleteSelected() {
-    const toDelete = new Set<string>();
+    const toDelete = new SvelteSet<string>();
     function collectChildren(parentId: string) {
       toDelete.add(parentId);
       items.filter((i) => i.parentId === parentId).forEach((i) => collectChildren(i.id));
@@ -194,7 +196,7 @@ ${outlines}  </body>
   }
 
   function toggleSelect(id: string) {
-    const newSet = new Set(selectedIds);
+    const newSet = new SvelteSet(selectedIds);
     if (newSet.has(id)) {
       newSet.delete(id);
     } else {
@@ -221,35 +223,64 @@ ${outlines}  </body>
   // Get folders for parent dropdown
   const folders = $derived(items.filter((i): i is OPMLFolder => i.type === 'folder'));
 
-  // Check if a folder is expanded (for visibility)
+  // Build lookup map + precompute depth/visibility in one pass
+  const itemMeta = $derived(() => {
+    const byId = new Map<string, OPMLItem>(items.map((i) => [i.id, i]));
+    const depth = new SvelteMap<string, number>();
+    const visible = new SvelteMap<string, boolean>();
+
+    function computeDepth(id: string | null): number {
+      if (id === null) return -1;
+      if (depth.has(id)) return depth.get(id)!;
+      const item = byId.get(id);
+      if (!item) return -1;
+      const d = 1 + computeDepth(item.parentId);
+      depth.set(id, d);
+      return d;
+    }
+
+    function computeVisible(id: string | null): boolean {
+      if (id === null) return true;
+      if (visible.has(id)) return visible.get(id)!;
+      const item = byId.get(id);
+      if (!item) return true;
+      const parent = item.parentId ? byId.get(item.parentId) : null;
+      const v = parent?.type === 'folder' && !parent.isExpanded ? false : computeVisible(item.parentId);
+      visible.set(id, v);
+      return v;
+    }
+
+    items.forEach((i) => {
+      computeDepth(i.id);
+      computeVisible(i.id);
+    });
+
+    return { depth, visible };
+  });
+
   function isVisible(item: OPMLItem): boolean {
-    if (item.parentId === null) return true;
-    const parent = items.find((i) => i.id === item.parentId);
-    if (!parent) return true;
-    if (parent.type === 'folder' && !parent.isExpanded) return false;
-    return isVisible(parent);
+    return itemMeta().visible.get(item.id) ?? true;
   }
 
-  // Get depth for indentation
   function getDepth(item: OPMLItem): number {
-    if (item.parentId === null) return 0;
-    const parent = items.find((i) => i.id === item.parentId);
-    if (!parent) return 0;
-    return 1 + getDepth(parent);
+    return itemMeta().depth.get(item.id) ?? 0;
   }
 
   // Sort items by parent hierarchy
   const sortedItems = $derived(() => {
     const result: OPMLItem[] = [];
+    const byParent = new SvelteMap<string | null, OPMLItem[]>();
+    items.forEach((i) => {
+      const list = byParent.get(i.parentId) ?? [];
+      list.push(i);
+      byParent.set(i.parentId, list);
+    });
+
     function addChildren(parentId: string | null) {
-      items
-        .filter((i) => i.parentId === parentId)
-        .forEach((item) => {
-          result.push(item);
-          if (item.type === 'folder') {
-            addChildren(item.id);
-          }
-        });
+      (byParent.get(parentId) ?? []).forEach((item) => {
+        result.push(item);
+        if (item.type === 'folder') addChildren(item.id);
+      });
     }
     addChildren(null);
     return result;
