@@ -287,6 +287,17 @@ ${outlines}  </body>
   });
 </script>
 
+<svelte:head>
+  <title>OPML Editor - lake.lochy</title>
+  <meta name="description" content="Edit, create, and manage OPML files. Import existing feeds, organize into folders, and export valid OPML 2.0." />
+  <meta property="og:title" content="OPML Editor - lake.lochy" />
+  <meta property="og:description" content="Edit, create, and manage OPML files. Import existing feeds, organize into folders, and export valid OPML 2.0." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="OPML Editor - lake.lochy" />
+  <meta name="twitter:description" content="Edit, create, and manage OPML files. Import existing feeds, organize into folders, and export valid OPML 2.0." />
+</svelte:head>
+
 <main class="mx-auto max-w-4xl px-6 py-8">
   <div class="mb-8 flex items-center justify-between">
     <h1 class="text-2xl font-bold">OPML Editor</h1>
